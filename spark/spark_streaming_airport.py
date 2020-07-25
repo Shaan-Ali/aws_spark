@@ -25,10 +25,10 @@ dest = ontime_data.map(lambda x: (x.Dest, 1)).reduceByKey(lambda a, b: a + b)
 popular = origin.union(dest).reduceByKey(lambda a, b: a + b)
 
 # traforming data using 1 as a key, and (AirlineID, ArrDelay) as value
-popular2 = popular.map(lambda (airport, count): (True, [(airport, count)]))
+popular2 = popular.map(lambda airport, count: (True, [(airport, count)]))
 
 # Flat map values
-airports = popular2.flatMapValues(lambda x: x).map(lambda (key, value): value)
+airports = popular2.flatMapValues(lambda x: x).map(lambda key, value: value)
 
 # debug
 airports.pprint()
