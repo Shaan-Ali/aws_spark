@@ -6,6 +6,7 @@ import json
 import sys
 import pprint
 
+OUTPUT_DIR = "intermediate/top10_airports/"
 
 zkQuorum, topic = sys.argv[1:]
 sc = SparkContext("local[2]", "KafkaOrderCount")
