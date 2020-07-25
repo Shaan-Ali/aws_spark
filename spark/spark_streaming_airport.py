@@ -46,6 +46,5 @@ airports.pprint()
 airports.repartition(1).saveAsTextFiles(OUTPUT_DIR)
 
 
-status_count.pprint()
 ssc.start()
 ssc.awaitTermination()
