@@ -13,26 +13,27 @@ ssc = StreamingContext(sc, 10)
 kvs = KafkaUtils.createStream(ssc, zkQuorum, "spark-streaming-consumer", {topic: 1})
 
 
-def parseLine(line):
-    fields = line.split(',')
-    arrDelay = float(fields[6])
-    carrier = fields[9]
-    return (carrier, arrDelay)
+# Get lines from kafka stream
+ontime_data = kvs.map(lambda x: x[1]).map(split).flatMap(parse)
 
+# Get origin and destionation
+origin = ontime_data.map(lambda x: (x.Origin, 1)).reduceByKey(lambda a, b: a + b)
+dest = ontime_data.map(lambda x: (x.Dest, 1)).reduceByKey(lambda a, b: a + b)
 
-# lines = sc.textFile("file:///SparkCourse/capstone/On_Time_On_Time_Performance_1988_1.csv")
-rdd = kvs.map(parseLine)
+# Union of the twd RDD. Sum by the same key. Then remember it
+popular = origin.union(dest).reduceByKey(lambda a, b: a + b)
 
-# totalsByAge = rdd.mapValues(lambda x: (x, 1)).reduceByKey(lambda x, y: (x[0] + y[0], x[1] + y[1]))
-arrDelayTotalByCarrier = rdd.mapValues(lambda x: (x, 1)).reduceByKey(lambda x, y: (x[0] + y[0], x[1] + y[1]))
+# traforming data using 1 as a key, and (AirlineID, ArrDelay) as value
+popular2 = popular.map(lambda (airport, count): (True, [(airport, count)]))
 
-# averagesByAge = totalsByAge.mapValues(lambda x: x[0] / x[1])
-avgDelay = arrDelayTotalByCarrier.mapValues(lambda x: x[0] / x[1]).collect()
-# results = avgDelay.sortBy(lambda a: a[1]).collect()
+# Flat map values
+airports = popular2.flatMapValues(lambda x: x).map(lambda (key, value): value)
 
-# results = sorted(avgDelay.sortBy(lambda a: a[1]).collect())
-for result in results:
-    print(result)
+# debug
+airports.pprint()
+
+# Saving data in hdfs
+airports.repartition(1).saveAsTextFiles(OUTPUT_DIR)
 
 
 status_count.pprint()
