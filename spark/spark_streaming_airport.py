@@ -27,8 +27,8 @@ rdd = kvs.map(parseLine)
 arrDelayTotalByCarrier = rdd.mapValues(lambda x: (x, 1)).reduceByKey(lambda x, y: (x[0] + y[0], x[1] + y[1]))
 
 # averagesByAge = totalsByAge.mapValues(lambda x: x[0] / x[1])
-avgDelay = arrDelayTotalByCarrier.mapValues(lambda x: x[0] / x[1])
-results = avgDelay.sortBy(lambda a: a[1]).collect()
+avgDelay = arrDelayTotalByCarrier.mapValues(lambda x: x[0] / x[1]).collect()
+# results = avgDelay.sortBy(lambda a: a[1]).collect()
 
 # results = sorted(avgDelay.sortBy(lambda a: a[1]).collect())
 for result in results:

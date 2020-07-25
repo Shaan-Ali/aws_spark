@@ -35,7 +35,8 @@ kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --par
 ./aws_spark/run_push_data.sh ip-172-31-63-86                /update Ip
 
 6. Start spark job 
-./aws_spark/run_spark.sh
+cd aws_spark
+./run_spark.sh
 
 =======
 others: for help:
