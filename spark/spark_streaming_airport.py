@@ -5,21 +5,10 @@ from pykafka import KafkaClient
 import json
 import sys
 import pprint
-import os
-import csv
-import datetime
-
-from StringIO import StringIO
-from collections import namedtuple
-from operator import itemgetter, add
 
 
 OUTPUT_DIR = "intermediate/top10_airports/"
 
-def split(line):
-    """Operator function for splitting a line with csv module"""
-    reader = csv.reader(StringIO(line))
-    return list(reader)
 
 
 def parse(rows):
@@ -35,7 +24,7 @@ kvs = KafkaUtils.createStream(ssc, zkQuorum, "spark-streaming-consumer", {topic:
 
 
 # Get lines from kafka stream
-ontime_data = kvs.map(lambda x: x[1]).map(split).flatMap(parse)
+ontime_data = kvs.map(lambda x: x[1]).map(lambda line: line.split(",")[2]).flatMap(parse)
 
 # Get origin and destionation
 origin = ontime_data.map(lambda x: (x.Origin, 1)).reduceByKey(lambda a, b: a + b)
