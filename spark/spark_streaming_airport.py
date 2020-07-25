@@ -7,25 +7,34 @@ import sys
 import pprint
 
 
-def pushOrderStatusInKafka(status_counts):
-    client = KafkaClient(hosts="ip-172-31-25-99:9092")
-    topic = client.topics['orders_ten_sec_data']
-    for status_count in status_counts:
-            with topic.get_producer() as producer:
-                    producer.produce(json.dumps(status_count))
-
-
 zkQuorum, topic = sys.argv[1:]
 sc = SparkContext("local[2]", "KafkaOrderCount")
 ssc = StreamingContext(sc, 10)
 kvs = KafkaUtils.createStream(ssc, zkQuorum, "spark-streaming-consumer", {topic: 1})
-lines = kvs.map(lambda x: x[1])
-status_count = lines.map(lambda line: line.split(",")[2]) \
-              .map(lambda order_status: (order_status, 1)) \
-              .reduceByKey(lambda a, b: a+b)
+
+
+def parseLine(line):
+    fields = line.split(',')
+    arrDelay = float(fields[6])
+    carrier = fields[9]
+    return (carrier, arrDelay)
+
+
+# lines = sc.textFile("file:///SparkCourse/capstone/On_Time_On_Time_Performance_1988_1.csv")
+rdd = kvs.map(parseLine)
+
+# totalsByAge = rdd.mapValues(lambda x: (x, 1)).reduceByKey(lambda x, y: (x[0] + y[0], x[1] + y[1]))
+arrDelayTotalByCarrier = rdd.mapValues(lambda x: (x, 1)).reduceByKey(lambda x, y: (x[0] + y[0], x[1] + y[1]))
+
+# averagesByAge = totalsByAge.mapValues(lambda x: x[0] / x[1])
+avgDelay = arrDelayTotalByCarrier.mapValues(lambda x: x[0] / x[1])
+results = avgDelay.sortBy(lambda a: a[1]).collect()
+
+# results = sorted(avgDelay.sortBy(lambda a: a[1]).collect())
+for result in results:
+    print(result)
 
 
 status_count.pprint()
-status_count.foreachRDD(lambda rdd: rdd.foreachPartition(pushOrderStatusInKafka))
 ssc.start()
 ssc.awaitTermination()
