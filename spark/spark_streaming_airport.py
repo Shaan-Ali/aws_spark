@@ -5,13 +5,33 @@ from pykafka import KafkaClient
 import json
 import sys
 import pprint
+import os
+import csv
+import datetime
+
+from StringIO import StringIO
+from collections import namedtuple
+from operator import itemgetter, add
+
 
 OUTPUT_DIR = "intermediate/top10_airports/"
+
+def split(line):
+    """Operator function for splitting a line with csv module"""
+    reader = csv.reader(StringIO(line))
+    return list(reader)
+
+
+def parse(rows):
+    """Parse multiple rows"""
+    return [parse_row(row) for row in rows]
+
 
 zkQuorum, topic = sys.argv[1:]
 sc = SparkContext("local[2]", "KafkaOrderCount")
 ssc = StreamingContext(sc, 10)
 kvs = KafkaUtils.createStream(ssc, zkQuorum, "spark-streaming-consumer", {topic: 1})
+
 
 
 # Get lines from kafka stream
