@@ -12,8 +12,12 @@ sudo yum install java-1.8.0
 spark-submit --version
 exit
 
-2. 
+1c.
 chmod 777 ./aws_spark/kafka_setup.sh
+chmod 777 ./aws_spark/run_push_data.sh
+chmod 777 ./aws_spark/run_spark.sh
+
+2. 
 ./aws_spark/kafka_setup.sh
 
 3. New:
@@ -29,11 +33,10 @@ kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --par
 
 
 5b. Push Topic
-chmod 777 ./aws_spark/run_push_data.sh
 ./aws_spark/run_push_data.sh ip-172-31-63-86
 
 6. Start spark job 
-spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0 ./aws_spark/spark/spark_streaming_airport.py localhost:2181 order_data
+./aws_spark/run_spark.sh
 
 =======
 others: for help:
