@@ -1,25 +1,24 @@
 # aws_spark
 
 1a. 
-sudo yum install git
-git --version
-git clone https://github.com/Shaan-Ali/aws_spark.git
-
-1b. 
 sudo -i
+yum install git
 pip install pykafka
 sudo yum install java-1.8.0
-spark-submit --version
 exit
+git --version
+spark-submit --version
 
-1c.
+1b.
+git clone https://github.com/Shaan-Ali/aws_spark.git
 chmod 777 ./aws_spark/kafka_setup.sh
 chmod 777 ./aws_spark/run_push_data.sh
 chmod 777 ./aws_spark/run_spark.sh
 
-2. 
+2. Kafka Setup:
 ./aws_spark/kafka_setup.sh
 
+** Start **
 3. New:
 ./kafka/bin/zookeeper-server-start.sh ./kafka/config/zookeeper.properties
 
@@ -33,7 +32,7 @@ kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --par
 
 
 5b. Push Topic
-./aws_spark/run_push_data.sh ip-172-31-63-86
+./aws_spark/run_push_data.sh ip-172-31-63-86                /update Ip
 
 6. Start spark job 
 ./aws_spark/run_spark.sh
