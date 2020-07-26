@@ -6,6 +6,8 @@ export JRE_HOME=/usr/lib/jvm/java-8-openjdk-amd64/jre
 export SPARK_HOME=/usr/local/spark
 export PATH=$PATH:/home/shaan/dev/kafka/bin/
 
+$SPARK_HOME/bin/spark-shell
+
 2. New:
 zookeeper-server-start.sh ./kafka/config/zookeeper.properties
 
@@ -23,7 +25,7 @@ spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0 --
  
 $SPARK_HOME/bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0 ./aws_spark/spark/spark_streaming_airport.py localhost:2181 order_data
 
-
+$SPARK_HOME/bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0 spark_ubuntu.py localhost:2181 airport_data
 ==========================================
 others: for help:
 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test
