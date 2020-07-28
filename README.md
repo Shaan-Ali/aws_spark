@@ -7,6 +7,7 @@ export SPARK_HOME=/usr/local/spark
 export PATH=$PATH:/home/shaan/dev/kafka/bin/
 
 $SPARK_HOME/bin/spark-shell
+$SPARK_HOME/bin/pyspark
 
 2. New:
 zookeeper-server-start.sh ./kafka/config/zookeeper.properties
