@@ -11,71 +11,18 @@ sc = SparkContext(conf=conf)
 sc.setLogLevel("WARN")
 ssc = StreamingContext(sc, n_secs)
 
-# Those are my fields
-fields = ("FlightDate", "AirlineID", "FlightNum", "Origin", "OriginCityName", "OriginStateName", "Dest", "DestCityName",
-          "DestStateName", "CRSDepTime", "DepDelay", "CRSArrTime", "ArrDelay", "Cancelled", "CancellationCode",
-          "Diverted", "CRSElapsedTime", "ActualElapsedTime", "AirTime", "Distance")
+def parseLine(line):
+    fields = line.split(',')
+    arrDelay = float(fields[6])
+    carrier = fields[9]
+    return (carrier, arrDelay)
 
-# A namedtuple object
-Ontime = namedtuple('Ontime', fields)
-
-
-def split(line):
-    """Operator function for splitting a line with csv module"""
-    reader = csv.reader(StringIO(line))
-    return list(reader)
-
-
-def splitOne(line):
-    """Operator function for splitting a line with csv module"""
-    reader = csv.reader(StringIO(line))
-    return reader.next()
-
-
-def parse(rows):
-    """Parse multiple rows"""
-    return [parse_row(row) for row in rows]
-
-
-def parse_row(row):
-    """Parses a row and returns a named tuple"""
-
-    row[fields.index("FlightDate")] = datetime.datetime.strptime(row[fields.index("FlightDate")], DATE_FMT).date()
-    row[fields.index("AirlineID")] = int(row[fields.index("AirlineID")])
-    row[fields.index("FlightNum")] = int(row[fields.index("FlightNum")])
-
-    # cicle amoung scheduled times
-    for index in ["CRSDepTime", "CRSArrTime"]:
-        if row[fields.index(index)] == "2400":
-            row[fields.index(index)] = "0000"
-
-        # Handle time values
-        try:
-            row[fields.index(index)] = datetime.datetime.strptime(row[fields.index(index)], TIME_FMT).time()
-
-        except ValueError:
-            # raise Exception, "problem in evaluating %s" %(row[fields.index(index)])
-            row[fields.index(index)] = None
-
-    row[fields.index("Cancelled")] = bool(int(row[fields.index("Cancelled")]))
-    row[fields.index("Diverted")] = bool(int(row[fields.index("Diverted")]))
-
-    # handle cancellation code
-    if row[fields.index("CancellationCode")] == '"':
-        row[fields.index("CancellationCode")] = None
-
-    # `handle float values
-    for index in ["DepDelay", "ArrDelay", "CRSElapsedTime", "Distance", "ActualElapsedTime", "AirTime"]:
-        try:
-            row[fields.index(index)] = float(row[fields.index(index)])
-        except ValueError:
-            row[fields.index(index)] = None
-
-    return Ontime(*row)
-
-def parse(rows):
-    """Parse multiple rows"""
-    return [parse_row(row) for row in rows]
+def print_rdd(rdd):
+    print('=============================')
+    airports = rdd.takeOrdered(10, key = lambda x: -x[1])
+    for airport in airports:
+        print(airport)
+    print('=============================')
 
 
 kafkaStream = KafkaUtils.createDirectStream(ssc,[topic], {
@@ -88,12 +35,25 @@ kafkaStream = KafkaUtils.createDirectStream(ssc,[topic], {
 # counts = lines.flatMap(lambda line: line.split(" ")).map(lambda word: (word, 1)).reduceByKey(lambda a, b: a+b)
 
 # Get lines from kafka stream
-ontime_data = kafkaStream.map(lambda x: x[1]).map(lambda line: line.split(",")[2]).flatMap(parse)
+
+rdd = kafkaStream.map(parseLine)
+
+# totalsByAge = rdd.mapValues(lambda x: (x, 1)).reduceByKey(lambda x, y: (x[0] + y[0], x[1] + y[1]))
+arrDelayTotalByCarrier = rdd.mapValues(lambda x: (x, 1)).reduceByKey(lambda x, y: (x[0] + y[0], x[1] + y[1]))
+
+# averagesByAge = totalsByAge.mapValues(lambda x: x[0] / x[1])
+avgDelay = arrDelayTotalByCarrier.mapValues(lambda x: x[0] / x[1])
+results = avgDelay.sortBy(lambda a: a[1]).collect()
+
+# results = sorted(avgDelay.sortBy(lambda a: a[1]).collect())
+# for result in results:
+#     print(result)
 
 
 
 
-airports.pprint()
+
+results.pprint()
 
 ssc.start()
 time.sleep(600) # Run stream for 10 minutes just in case no detection of producer # ssc. awaitTermination() ssc.stop(stopSparkContext=True,stopGraceFully=True)
