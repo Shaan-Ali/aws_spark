@@ -90,6 +90,18 @@ kafkaStream = KafkaUtils.createDirectStream(ssc,[topic], {
 # Get lines from kafka stream
 ontime_data = kafkaStream.map(lambda x: x[1]).map(lambda line: line.split(",")[2]).flatMap(parse)
 
+# Get origin and destionation
+origin = ontime_data.map(lambda x: (x.Origin, 1)).reduceByKey(lambda a, b: a + b)
+dest = ontime_data.map(lambda x: (x.Dest, 1)).reduceByKey(lambda a, b: a + b)
+
+# Union of the twd RDD. Sum by the same key. Then remember it
+popular = origin.union(dest).reduceByKey(lambda a, b: a + b)
+
+# traforming data using 1 as a key, and (AirlineID, ArrDelay) as value
+popular2 = popular.map(lambda airport, count: (True, [(airport, count)]))
+
+# Flat map values
+airports = popular2.flatMapValues(lambda x: x).map(lambda key, value: value)
 
 
 
