@@ -1,13 +1,21 @@
 # Running in Ubuntu
 1. In all new window:
-cd /dev
+cd dev
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 export JRE_HOME=/usr/lib/jvm/java-8-openjdk-amd64/jre
 export SPARK_HOME=/usr/local/spark
 export PATH=$PATH:/home/shaan/dev/kafka/bin/
+export PATH=$PATH:$SPARK_HOME/bin/
 
-$SPARK_HOME/bin/spark-shell
+spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0  ./aws_spark/spark/airport.py
+--------
+        ./kafka/bin/kafka-console-producer.sh --broker-list shaan-VirtualBox92  --topic order_data
+/bin/bash ./aws_spark/kafka/push_data_in_topic.sh ./aws_spark/data shaan-VirtualBox:9092 order_data
+====================================
+--master yarn --executor-cores=4 --num-executors 16 --driver-memory=4G --executor-memory=12G
+ localhost:2181 AWSKafkaTutorialTopic
 $SPARK_HOME/bin/pyspark
+
 
 2. New:
 zookeeper-server-start.sh ./kafka/config/zookeeper.properties
@@ -17,7 +25,7 @@ kafka-server-start.sh ./kafka/config/server.properties
 
 5. New: 
 kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic order_data
-kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic orders_ten_sec_data
+-- kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic orders_ten_sec_data
 /bin/bash ./aws_spark/kafka/push_data_in_topic.sh ./aws_spark/data shaan-VirtualBox:9092 order_data
 
 6. Start spark job 
