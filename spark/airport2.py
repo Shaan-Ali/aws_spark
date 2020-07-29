@@ -3,6 +3,18 @@ import time
 from pyspark import SparkContext, SparkConf
 from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
+from collections import namedtuple
+import datetime
+
+ZOOKEEPER = ['localhost:2181']
+ZKQUORUM = ",".join(ZOOKEEPER) #zkQuorum:  Zookeeper quorum (hostname:port,hostname:port,..)
+# HDFS_PREFIX = "hdfs://%s:8020" %(HOST)
+LOOKUP_DIR = "~/dev/ccc-capstone/lookup/"
+DATA_DIR = "~/dev/ccc-capstone/filtered_data"
+TEST_DIR = "~/dev/ccc-capstone/test"
+DATE_FMT = "%Y-%m-%d"
+TIME_FMT = "%H%M"
+
 
 n_secs = 1
 topic = "order_data"

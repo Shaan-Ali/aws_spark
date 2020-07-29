@@ -6,11 +6,15 @@ export JRE_HOME=/usr/lib/jvm/java-8-openjdk-amd64/jre
 export SPARK_HOME=/usr/local/spark
 export PATH=$PATH:/home/shaan/dev/kafka/bin/
 export PATH=$PATH:$SPARK_HOME/bin/
+echo $PATH
 
 spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0  ./aws_spark/spark/airport.py
+
 --------
-        ./kafka/bin/kafka-console-producer.sh --broker-list shaan-VirtualBox92  --topic order_data
 /bin/bash ./aws_spark/kafka/push_data_in_topic.sh ./aws_spark/data shaan-VirtualBox:9092 order_data
+
+./kafka/bin/kafka-console-producer.sh --broker-list shaan-VirtualBox92  --topic order_data
+/usr/hdp/current/kafka-broker/bin/kafka-console-producer.sh --broker-list node4:6667  --topic test
 ====================================
 --master yarn --executor-cores=4 --num-executors 16 --driver-memory=4G --executor-memory=12G
  localhost:2181 AWSKafkaTutorialTopic
