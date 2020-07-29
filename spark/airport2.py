@@ -24,9 +24,12 @@ sc.setLogLevel("WARN")
 ssc = StreamingContext(sc, n_secs)
 
 # Those are my fields
-fields = ("FlightDate", "AirlineID", "FlightNum", "Origin", "OriginCityName", "OriginStateName", "Dest", "DestCityName",
-          "DestStateName", "CRSDepTime", "DepDelay", "CRSArrTime", "ArrDelay", "Cancelled", "CancellationCode",
-          "Diverted", "CRSElapsedTime", "ActualElapsedTime", "AirTime", "Distance")
+# fields = ("FlightDate", "AirlineID", "FlightNum", "Origin", "OriginCityName", "OriginStateName", "Dest", "DestCityName",
+#           "DestStateName", "CRSDepTime", "DepDelay", "CRSArrTime", "ArrDelay", "Cancelled", "CancellationCode",
+#           "Diverted", "CRSElapsedTime", "ActualElapsedTime", "AirTime", "Distance")
+
+fields = ("FlightDate", "Origin", "DepTime", "DepDelay", "Dest", "ArrTime", "ArrDelay",
+            "DayOfWeek", "AirlineID", "Carrier", "FlightNum", "Year")
 
 # A namedtuple object
 Ontime = namedtuple('Ontime', fields)
