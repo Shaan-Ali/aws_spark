@@ -14,7 +14,7 @@ conf = SparkConf().setAppName("KafkaStreamProcessor").setMaster("local[*]")
 sc = SparkContext(conf=conf)
 sc.setLogLevel("WARN")
 ssc = StreamingContext(sc, n_secs)
-ssc.checkpoint('/tmp/g1ex3')
+ssc.checkpoint('/tmp/g2ex1')
 
 def print_rdd(rdd):
     print('=============================')
@@ -50,8 +50,9 @@ kafkaStream = KafkaUtils.createDirectStream(ssc,[topic], {
 
 ontime_data = kafkaStream.map(lambda x: x[1]).map(split).flatMap(parse)
 
-filtered = ontime_data.map(lambda fl: (fl.DayOfWeek, (fl.ArrDelay, 1)))\
+filtered = ontime_data.map(lambda fl: ((fl.Origin, fl.Carrier), (fl.DepDelay, 1)))\
                 .updateStateByKey(updateFunction)
+
 
 filtered.foreachRDD(lambda rdd: print_rdd(rdd))
 

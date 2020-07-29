@@ -1,8 +1,6 @@
 import sys
 import time
 import signal
-
-
 from pyspark import SparkContext, SparkConf
 from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
@@ -10,11 +8,6 @@ from common import *
 
 n_secs = 1
 topic = "order_data"
-conf = SparkConf().setAppName("KafkaStreamProcessor").setMaster("local[*]")
-sc = SparkContext(conf=conf)
-sc.setLogLevel("WARN")
-ssc = StreamingContext(sc, n_secs)
-ssc.checkpoint('/tmp/g1ex3')
 
 def print_rdd(rdd):
     print('=============================')
@@ -25,7 +18,6 @@ def print_rdd(rdd):
 
 
 def updateFunction(new_values, last_sum):
-
     new_vals0 = 0.0
     new_vals1 = 0
 
@@ -39,8 +31,23 @@ def updateFunction(new_values, last_sum):
     return (new_vals0 + last_vals0,\
             new_vals1 + last_vals1)
 
+#  flight_date = datetime.date(flight.Year, flight.Month, flight.DayofMonth)
+# AttributeError: 'Ontime' object has no attribute 'Month'
+
+def map_flight(flight, is_yz=False):
+    flight_date = datetime.date(flight.Year, flight.Month, flight.DayofMonth)
+    y_flight = flight.Dest
+    if (is_yz):
+        flight_date -= datetime.timedelta(days=2)
+        y_flight = flight.Origin
+    return ((str(flight_date), y_flight), flight)
 
 
+conf = SparkConf().setAppName("KafkaStreamProcessor").setMaster("local[*]")
+sc = SparkContext(conf=conf)
+sc.setLogLevel("WARN")
+ssc = StreamingContext(sc, n_secs)
+ssc.checkpoint('/tmp/g2ex1')
 
 kafkaStream = KafkaUtils.createDirectStream(ssc,[topic], {
     'bootstrap.servers':'localhost:9092',
@@ -48,14 +55,25 @@ kafkaStream = KafkaUtils.createDirectStream(ssc,[topic], {
     'fetch.message.max.bytes':'15728640',
     'auto.offset.reset':'largest'}) # Group ID is completely arbitrary
 
+
 ontime_data = kafkaStream.map(lambda x: x[1]).map(split).flatMap(parse)
 
-filtered = ontime_data.map(lambda fl: (fl.DayOfWeek, (fl.ArrDelay, 1)))\
-                .updateStateByKey(updateFunction)
+# filter XY candidates
+flights_xy = ontime_data.filter(lambda fl: fl.DepTime < "1200")\
+                .map(map_flight)
+                #.reduceByKey(reduce_flight)
 
-filtered.foreachRDD(lambda rdd: print_rdd(rdd))
+# filter YZ candidates
+flights_yz = ontime_data.filter(lambda fl: fl.DepTime > "1200")\
+                .map(lambda fl: map_flight(fl, True))
+                #.reduceByKey(reduce_flight)
 
-# filtered.pprint()
+# join both legs
+flights_xyz = flights_xy.join(flights_yz)
+
+
+flights_xyz.foreachRDD(lambda rdd: print_rdd(rdd))
+
 
 ssc.start()
 time.sleep(600) # Run stream for 10 minutes just in case no detection of producer # ssc. awaitTermination() ssc.stop(stopSparkContext=True,stopGraceFully=True)
