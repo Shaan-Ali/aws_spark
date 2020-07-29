@@ -12,7 +12,8 @@ ZKQUORUM = ",".join(ZOOKEEPER) #zkQuorum:  Zookeeper quorum (hostname:port,hostn
 LOOKUP_DIR = "~/dev/ccc-capstone/lookup/"
 DATA_DIR = "~/dev/ccc-capstone/filtered_data"
 TEST_DIR = "~/dev/ccc-capstone/test"
-DATE_FMT = "%Y-%m-%d"
+# DATE_FMT = "%Y-%m-%d"
+DATE_FMT = "%d/%m/%Y"
 TIME_FMT = "%H%M"
 
 
@@ -60,37 +61,26 @@ def parse_row(row):
     row[fields.index("FlightNum")] = int(row[fields.index("FlightNum")])
 
     # cicle amoung scheduled times
-    for index in ["CRSDepTime", "CRSArrTime"]:
+    for index in ["DepTime", "ArrTime"]:
         if row[fields.index(index)] == "2400":
             row[fields.index(index)] = "0000"
 
-        # Handle time values
-        try:
-            row[fields.index(index)] = datetime.datetime.strptime(row[fields.index(index)], TIME_FMT).time()
-
-        except ValueError:
-            # raise Exception, "problem in evaluating %s" %(row[fields.index(index)])
-            row[fields.index(index)] = None
-
-    row[fields.index("Cancelled")] = bool(int(row[fields.index("Cancelled")]))
-    row[fields.index("Diverted")] = bool(int(row[fields.index("Diverted")]))
+#         # Handle time values
+#         try:
+#             row[fields.index(index)] = datetime.datetime.strptime(row[fields.index(index)], TIME_FMT).time()
+#
+#         except ValueError:
+#             # raise Exception, "problem in evaluating %s" %(row[fields.index(index)])
+#             row[fields.index(index)] = None
 
     # handle cancellation code
     if row[fields.index("CancellationCode")] == '"':
         row[fields.index("CancellationCode")] = None
 
-    # `handle float values
-    for index in ["DepDelay", "ArrDelay", "CRSElapsedTime", "Distance", "ActualElapsedTime", "AirTime"]:
-        try:
-            row[fields.index(index)] = float(row[fields.index(index)])
-        except ValueError:
-            row[fields.index(index)] = None
-
     return Ontime(*row)
 
-def parse(rows):
-    """Parse multiple rows"""
-    return [parse_row(row) for row in rows]
+
+
 
 
 kafkaStream = KafkaUtils.createDirectStream(ssc,[topic], {
