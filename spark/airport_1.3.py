@@ -1,8 +1,6 @@
 import sys
 import time
 import signal
-
-
 from pyspark import SparkContext, SparkConf
 from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
@@ -14,7 +12,7 @@ conf = SparkConf().setAppName("KafkaStreamProcessor").setMaster("local[*]")
 sc = SparkContext(conf=conf)
 sc.setLogLevel("WARN")
 ssc = StreamingContext(sc, n_secs)
-ssc.checkpoint('/tmp/g1ex3')
+ssc.checkpoint('~/dev/aws_spark/tmp/g1ex3')
 
 def print_rdd(rdd):
     print('=============================')
@@ -25,21 +23,15 @@ def print_rdd(rdd):
 
 
 def updateFunction(new_values, last_sum):
-
     new_vals0 = 0.0
     new_vals1 = 0
-
     for val in new_values:
         new_vals0 += val[0]
         new_vals1 += val[1]
-
     last_vals0 = last_sum[0] if last_sum is not None else 0.0
     last_vals1 = last_sum[1] if last_sum is not None else 0
-
     return (new_vals0 + last_vals0,\
             new_vals1 + last_vals1)
-
-
 
 
 kafkaStream = KafkaUtils.createDirectStream(ssc,[topic], {
@@ -48,6 +40,7 @@ kafkaStream = KafkaUtils.createDirectStream(ssc,[topic], {
     'fetch.message.max.bytes':'15728640',
     'auto.offset.reset':'largest'}) # Group ID is completely arbitrary
 
+# Main Code
 ontime_data = kafkaStream.map(lambda x: x[1]).map(split).flatMap(parse)
 
 filtered = ontime_data.map(lambda fl: (fl.DayOfWeek, (fl.ArrDelay, 1)))\
@@ -55,8 +48,15 @@ filtered = ontime_data.map(lambda fl: (fl.DayOfWeek, (fl.ArrDelay, 1)))\
 
 filtered.foreachRDD(lambda rdd: print_rdd(rdd))
 
-# filtered.pprint()
 
 ssc.start()
-time.sleep(600) # Run stream for 10 minutes just in case no detection of producer # ssc. awaitTermination() ssc.stop(stopSparkContext=True,stopGraceFully=True)
 
+try:
+    ssc.awaitTermination()
+except:
+    pass
+
+try:
+    time.sleep(10)
+except:
+    pass

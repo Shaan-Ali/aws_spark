@@ -1,8 +1,6 @@
 import sys
 import time
 import signal
-
-
 from pyspark import SparkContext, SparkConf
 from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
@@ -14,7 +12,7 @@ conf = SparkConf().setAppName("KafkaStreamProcessor").setMaster("local[*]")
 sc = SparkContext(conf=conf)
 sc.setLogLevel("WARN")
 ssc = StreamingContext(sc, n_secs)
-ssc.checkpoint('~/dev/aws_spark/tmp/g2ex1')
+ssc.checkpoint('~/dev/aws_spark/tmp/g2ex2')
 
 def print_rdd(rdd):
     print('=============================')
@@ -40,8 +38,6 @@ def updateFunction(new_values, last_sum):
             new_vals1 + last_vals1)
 
 
-
-
 kafkaStream = KafkaUtils.createDirectStream(ssc,[topic], {
     'bootstrap.servers':'localhost:9092',
     'group.id':'video-group',
@@ -50,8 +46,8 @@ kafkaStream = KafkaUtils.createDirectStream(ssc,[topic], {
 
 ontime_data = kafkaStream.map(lambda x: x[1]).map(split).flatMap(parse)
 
-filtered = ontime_data.map(lambda fl: ((fl.Origin, fl.Carrier), (fl.DepDelay, 1)))\
-                .updateStateByKey(updateFunction)
+filtered = ontime_data.map(lambda fl: ((fl.Origin, fl.Dest), (fl.DepDelay, 1)))\
+                                      .updateStateByKey(updateFunction)
 
 
 filtered.foreachRDD(lambda rdd: print_rdd(rdd))

@@ -6,10 +6,11 @@ export JRE_HOME=/usr/lib/jvm/java-8-openjdk-amd64/jre
 export SPARK_HOME=/usr/local/spark
 export PATH=$PATH:/home/shaan/dev/kafka/bin/
 export PATH=$PATH:$SPARK_HOME/bin/
+
 echo $PATH
 
 spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0  ./aws_spark/spark/airport.py
-
+spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0  airport_1.3.py
 --------
 /bin/bash ./aws_spark/kafka/push_data_in_topic.sh ./aws_spark/data shaan-VirtualBox:9092 order_data
 

@@ -35,7 +35,7 @@ def updateFunction(new_values, last_sum):
 # AttributeError: 'Ontime' object has no attribute 'Month'
 
 def map_flight(flight, is_yz=False):
-    flight_date = datetime.date(flight.Year, flight.Month, flight.DayofMonth)
+    flight_date = datetime.date(flight.FlightDate)
     y_flight = flight.Dest
     if (is_yz):
         flight_date -= datetime.timedelta(days=2)
@@ -47,7 +47,7 @@ conf = SparkConf().setAppName("KafkaStreamProcessor").setMaster("local[*]")
 sc = SparkContext(conf=conf)
 sc.setLogLevel("WARN")
 ssc = StreamingContext(sc, n_secs)
-ssc.checkpoint('/tmp/g2ex1')
+ssc.checkpoint('~/dev/aws_spark/tmp/g3ex2')
 
 kafkaStream = KafkaUtils.createDirectStream(ssc,[topic], {
     'bootstrap.servers':'localhost:9092',
@@ -78,3 +78,4 @@ flights_xyz.foreachRDD(lambda rdd: print_rdd(rdd))
 ssc.start()
 time.sleep(600) # Run stream for 10 minutes just in case no detection of producer # ssc. awaitTermination() ssc.stop(stopSparkContext=True,stopGraceFully=True)
 
+# https://github.com/gmcorral/cloud-capstone/blob/master/spark/flight.py
