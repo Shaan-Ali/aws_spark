@@ -7,3 +7,7 @@ https://medium.com/@wfaria_1/kafka-apache-spark-streaming-example-on-aws-free-ti
 
 Main doc: for MSK
 https://docs.aws.amazon.com/msk/latest/developerguide/create-cluster.html
+
+
+Good blog to do it:
+https://www.rittmanmead.com/blog/2017/01/getting-started-with-spark-streaming-with-python-and-kafka/

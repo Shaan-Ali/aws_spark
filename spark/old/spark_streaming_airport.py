@@ -6,9 +6,28 @@ import json
 import sys
 import pprint
 
-
+CHECKPOINT_DIR = "checkpoint/top10_airports"
 OUTPUT_DIR = "intermediate/top10_airports/"
+APP_NAME = "Top 10 Airports"
 
+
+# Function to create and setup a new StreamingContext
+def functionToCreateContext():
+    conf = SparkConf()
+    conf = conf.setAppName(APP_NAME)
+    sc = SparkContext(conf=conf)
+
+    # http://stackoverflow.com/questions/24686474/shipping-python-modules-in-pyspark-to-other-nodes
+    # sc.addPyFile("common.py")
+
+    # As argument Spark Context and batch retention
+    ssc = StreamingContext(sc, 60)
+
+    # set checkpoint directory
+    ssc.checkpoint(CHECKPOINT_DIR)
+
+    # return streaming spark context
+    return ssc
 
 
 def parse(rows):
@@ -17,8 +36,8 @@ def parse(rows):
 
 
 zkQuorum, topic = sys.argv[1:]
-sc = SparkContext("local[2]", "KafkaOrderCount")
-ssc = StreamingContext(sc, 10)
+ssc = StreamingContext.getOrCreate(CHECKPOINT_DIR, functionToCreateContext)
+sc = ssc.sparkContext
 kvs = KafkaUtils.createStream(ssc, zkQuorum, "spark-streaming-consumer", {topic: 1})
 
 
