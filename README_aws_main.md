@@ -1,6 +1,6 @@
 # aws_spark
 
-aws s3 cp . s3://airport-bucket-0705/ --recursive
+aws s3 cp s3://aws-bucket-0730/ .  --recursive
 
 
 1a. 
