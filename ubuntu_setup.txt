@@ -1,0 +1,39 @@
+cd /dev
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export JRE_HOME=/usr/lib/jvm/java-8-openjdk-amd64/jre
+export SPARK_HOME=/usr/local/spark
+$SPARK_HOME/bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0 ./aws_spark/spark/spark_streaming_airport.py localhost:2181 order_data
+
+
+
+
+=======
+$SPARK_HOME/sbin/start-master.sh
+$SPARK_HOME/sbin/start-slave.sh spark://ethane:7077
+pip install pykafka
+java --version
+
+sudo ln -s /usr/local/spark/ /usr/local/spark
+
+https://datawookie.netlify.app/blog/2017/07/installing-spark-on-ubuntu/
+=====
+Install spark:
+wget https://mirrors.ocf.berkeley.edu/apache/spark/spark-2.4.6/spark-2.4.6-bin-hadoop2.7.tgz
+tar -xvf spark-2.4.6-bin-hadoop2.7.tgz
+mv spark-2.4.6-bin-hadoop2.7 spark
+rm spark-2.4.6-bin-hadoop2.7.tgz
+sudo mv spark /usr/local/
+cd /usr/local/spark
+=======
+Java update:
+sudo apt-get update
+sudo apt-get install openjdk-8-jdk
+java -version
+============
+$SPARK_HOME/bin/spark-shell
+$SPARK_HOME/bin/pyspark
+$SPARK_HOME/bin/spark-submit --version
+echo $JAVA_HOME
+
+
+git clone https://github.com/Shaan-Ali/aws_spark.git

@@ -1,0 +1,11 @@
+import org.apache.spark.SparkConf
+val conf = new SparkConf().setMaster("local[*]").setAppName("KafkaReceiver")
+
+import org.apache.spark.streaming.StreamingContext
+import org.apache.spark.streaming.Seconds
+val ssc = new StreamingContext(conf, Seconds(10))
+
+import org.apache.spark.streaming.kafka.KafkaUtils
+val kafkaStream = KafkaUtils.createStream(ssc, "localhost:2181","spark-streaming-consumer-group", Map("mytopic" -> 5))
+
+kafkaStream.print() ssc.start
