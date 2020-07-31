@@ -1,49 +1,41 @@
 # Running in Ubuntu
-1. In all new window:
+# In all new window:
 cd dev
+
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+
 export JRE_HOME=/usr/lib/jvm/java-8-openjdk-amd64/jre
+
 export SPARK_HOME=/usr/local/spark
+
 export PATH=$PATH:/home/shaan/dev/kafka/bin/
+
 export PATH=$PATH:$SPARK_HOME/bin/
 
 echo $PATH
 
-spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0  ./aws_spark/spark/airport.py
-spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0  airport_1.3.py
---------
-/bin/bash ./aws_spark/kafka/push_data_in_topic.sh ./aws_spark/data shaan-VirtualBox:9092 order_data
-
-./kafka/bin/kafka-console-producer.sh --broker-list shaan-VirtualBox92  --topic order_data
-/usr/hdp/current/kafka-broker/bin/kafka-console-producer.sh --broker-list node4:6667  --topic test
 ====================================
---master yarn --executor-cores=4 --num-executors 16 --driver-memory=4G --executor-memory=12G
- localhost:2181 AWSKafkaTutorialTopic
-$SPARK_HOME/bin/pyspark
-
-
-2. New:
+#1. New:
 zookeeper-server-start.sh ./kafka/config/zookeeper.properties
 
-3. New:
+#2. New:
 kafka-server-start.sh ./kafka/config/server.properties
 
-5. New: 
+#3a. New: 
 kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic order_data
--- kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic orders_ten_sec_data
-/bin/bash ./aws_spark/kafka/push_data_in_topic.sh ./aws_spark/data shaan-VirtualBox:9092 order_data
 
-6. Start spark job 
-spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0 --master yarn --executor-cores=4 --num-executors 16 --driver-memory=4G --executor-memory=12G 
-./aws_spark/spark/spark_streaming_airport.py localhost:2181 AWSKafkaTutorialTopic
- 
-$SPARK_HOME/bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0 ./aws_spark/spark/spark_streaming_airport.py localhost:2181 order_data
+#3b. Data start:
+cd ~/dev/aws_spark/kafka
 
-$SPARK_HOME/bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0 spark_ubuntu.py localhost:2181 airport_data
-==========================================
-others: for help:
-bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test
-./spark/bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0  --jars spark-streaming-kafka-assembly_2.10-1.6.0.jar spark_streaming_order_status.py localhost:2181 order_data
+/bin/bash ./push_data_in_topic.sh ../data shaan-VirtualBox:9092 order_data
+
+#4. New: Spark start: 
+cd ~/dev/aws_spark/spark
+
+spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0  airport_1.3.py
+
+
+#==========================================
 ==========================================
 # One time setup
 1a. 
@@ -62,3 +54,23 @@ chmod 777 ./aws_spark/run_spark.sh
 
 2. Kafka Setup:
 ./aws_spark/kafka_setup.sh
+==================
+# Others: for help:
+bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test
+./spark/bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0  --jars spark-streaming-kafka-assembly_2.10-1.6.0.jar spark_streaming_order_status.py localhost:2181 order_data
+
+--master yarn --executor-cores=4 --num-executors 16 --driver-memory=4G --executor-memory=12G
+ localhost:2181 AWSKafkaTutorialTopic
+$SPARK_HOME/bin/pyspark
+
+
+spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0 --master yarn --executor-cores=4 --num-executors 16 --driver-memory=4G --executor-memory=12G 
+./aws_spark/spark/spark_streaming_airport.py localhost:2181 AWSKafkaTutorialTopic
+
+-- kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic orders_ten_sec_data
+
+$SPARK_HOME/bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0 ./aws_spark/spark/spark_streaming_airport.py localhost:2181 order_data
+$SPARK_HOME/bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0 spark_ubuntu.py localhost:2181 airport_data
+
+/bin/bash ./aws_spark/kafka/push_data_in_topic.sh ./aws_spark/data shaan-VirtualBox:9092 order_data
+./kafka/bin/kafka-console-producer.sh --broker-list shaan-VirtualBox92  --topic order_data

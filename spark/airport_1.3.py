@@ -1,6 +1,5 @@
 import sys
 import time
-import signal
 from pyspark import SparkContext, SparkConf
 from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
@@ -48,7 +47,7 @@ filtered = ontime_data.map(lambda fl: (fl.DayOfWeek, (fl.ArrDelay, 1)))\
 
 filtered.foreachRDD(lambda rdd: print_rdd(rdd))
 
-
+# start streaming process
 ssc.start()
 
 try:

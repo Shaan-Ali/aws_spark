@@ -1,12 +1,13 @@
 import sys
 import time
 import signal
-
-
 from pyspark import SparkContext, SparkConf
 from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
 from common import *
+from boto import dynamodb2
+from boto.dynamodb2.table import Table
+from boto.dynamodb2.items import Item
 
 n_secs = 1
 topic = "order_data"
@@ -15,6 +16,24 @@ sc = SparkContext(conf=conf)
 sc.setLogLevel("WARN")
 ssc = StreamingContext(sc, n_secs)
 ssc.checkpoint('~/dev/aws_spark/tmp/g2ex1')
+
+# DynamoDB region and bucket name
+AWS_REGION = 'us-east-1'
+DB_TABLE = 't2g2ex1'
+dynamo = dynamodb2.connect_to_region(AWS_REGION)
+out_table = Table(DB_TABLE, connection = dynamo)
+
+######
+###### Partial results printer #######
+######
+def save_partition(part):
+    for record in part:
+        item = Item(out_table, data={
+            "airport": record[0][0],
+            "carrier": record[0][1],
+            "mean_delay": int(record[1][0] / record[1][1])
+        })
+        item.save(overwrite=True)
 
 def print_rdd(rdd):
     print('=============================')
@@ -25,14 +44,11 @@ def print_rdd(rdd):
 
 
 def updateFunction(new_values, last_sum):
-
     new_vals0 = 0.0
     new_vals1 = 0
-
     for val in new_values:
         new_vals0 += val[0]
         new_vals1 += val[1]
-
     last_vals0 = last_sum[0] if last_sum is not None else 0.0
     last_vals1 = last_sum[1] if last_sum is not None else 0
 
@@ -54,10 +70,18 @@ filtered = ontime_data.map(lambda fl: ((fl.Origin, fl.Carrier), (fl.DepDelay, 1)
                 .updateStateByKey(updateFunction)
 
 
-filtered.foreachRDD(lambda rdd: print_rdd(rdd))
+# filtered.foreachRDD(lambda rdd: print_rdd(rdd))
+filtered.foreachRDD(lambda rdd: rdd.foreachPartition(save_partition))
 
-# filtered.pprint()
-
+# start streaming process
 ssc.start()
-time.sleep(600) # Run stream for 10 minutes just in case no detection of producer # ssc. awaitTermination() ssc.stop(stopSparkContext=True,stopGraceFully=True)
 
+try:
+    ssc.awaitTermination()
+except:
+    pass
+
+try:
+    time.sleep(10)
+except:
+    pass
