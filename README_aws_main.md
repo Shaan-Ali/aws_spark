@@ -1,7 +1,6 @@
 # aws_spark
-
-aws s3 cp s3://aws-bucket-0730/ .  --recursive
-
+mkdir data 
+aws s3 cp s3://aws-bucket-0730/ data  --recursive
 
 1a. 
 sudo -i
@@ -20,6 +19,7 @@ chmod 777 ./aws_spark/run_spark.sh
 
 2. Kafka Setup:
 ./aws_spark/kafka_setup.sh
+export PATH=$PATH:/home/hadoop/kafka/bin/
 
 ** Start **
 3. New:
@@ -28,14 +28,14 @@ chmod 777 ./aws_spark/run_spark.sh
 4. New:
 ./kafka/bin/kafka-server-start.sh ./kafka/config/server.properties
 
+export PATH=$PATH:/home/hadoop/kafka/bin/
 kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic order_data
 
-echo $PATH
-export PATH=$PATH:/home/hadoop/kafka/bin/
 
 5. Push Topic
-/bin/bash ./aws_spark/kafka/push_data_in_topic.sh ./aws_spark/data ip-172-31-55-98:9092 order_data
-    /bin/bash ./push_data_in_topic.sh ../data/year=1988 ip-172-31-55-98:9092 order_data
+cd ./aws_spark/kafka/
+/bin/bash ./push_data_in_topic.sh ../data/year=1988 ip-172-31-59-7:9092 order_data
+    /bin/bash ./aws_spark/kafka/push_data_in_topic.sh ./aws_spark/data ip-172-31-59-7:9092 order_data
 --- /bin/bash ./aws_spark/kafka/push_data_in_topic.sh ./aws_spark/data shaan-VirtualBox:9092 order_data
 
 6. Start spark job 
