@@ -2,6 +2,7 @@
 
 1a. 
 sudo -i
+pip install boto
 yum install git
 pip install pykafka
 sudo yum install java-1.8.0

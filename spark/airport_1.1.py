@@ -1,6 +1,5 @@
 import sys
 import time
-
 from pyspark import SparkContext, SparkConf
 from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
@@ -12,6 +11,24 @@ conf = SparkConf().setAppName("KafkaStreamProcessor").setMaster("local[*]")
 sc = SparkContext(conf=conf)
 sc.setLogLevel("WARN")
 ssc = StreamingContext(sc, n_secs)
+ssc.checkpoint('~/dev/aws_spark/tmp/g1ex1')
+
+######
+###### Partial results printer #######
+######
+def print_rdd(rdd):
+    print('=============================')
+    airports = rdd.takeOrdered(10, key = lambda x: -x[1])
+    for airport in airports:
+        print(airport)
+    print('=============================')
+
+
+######
+###### Checkpoint status updater #######
+######
+def updateFunction(new_values, last_sum):
+    return sum(new_values) + (last_sum or 0)
 
 
 kafkaStream = KafkaUtils.createDirectStream(ssc,[topic], {
@@ -20,24 +37,23 @@ kafkaStream = KafkaUtils.createDirectStream(ssc,[topic], {
     'fetch.message.max.bytes':'15728640',
     'auto.offset.reset':'largest'}) # Group ID is completely arbitrary
 
+# Main Code
 ontime_data = kafkaStream.map(lambda x: x[1]).map(split).flatMap(parse)
 
-# Get origin and destionation
-origin = ontime_data.map(lambda x: (x.Origin,1)).reduceByKey(lambda a, b: a+b)
-dest = ontime_data.map(lambda x: (x.Dest,1)).reduceByKey(lambda a, b: a+b)
+filtered = ontime_data.flatMap(lambda fl: [(fl.Origin, 1), (fl.Dest, 1)])\
+                                      .updateStateByKey(updateFunction)
 
-# Union of the twd RDD. Sum by the same key. Then remember it
-popular = origin.union(dest).reduceByKey(lambda a, b: a+b)
+filtered.foreachRDD(lambda rdd: print_rdd(rdd))
 
-# traforming data using 1 as a key, and (AirlineID, ArrDelay) as value
-popular2 = popular.map(lambda (airport, count): (True, [(airport, count)]))
-
-# Flat map values
-airports = popular2.flatMapValues(lambda x: x).map(lambda (key, value): value)
-
-# debug
-
-airports.pprint()
-
+# start streaming process
 ssc.start()
-time.sleep(600) # Run stream for 10 minutes just in case no detection of producer # ssc. awaitTermination() ssc.stop(stopSparkContext=True,stopGraceFully=True)
+
+try:
+    ssc.awaitTermination()
+except:
+    pass
+
+try:
+    time.sleep(10)
+except:
+    pass

@@ -5,17 +5,17 @@ from pyspark import SparkContext, SparkConf
 from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
 from common import *
+from boto import dynamodb2
+from boto.dynamodb2.table import Table
+from boto.dynamodb2.items import Item
 
 n_secs = 1
 topic = "order_data"
 
-def print_rdd(rdd):
-    print('=============================')
-    daysOfWeek = rdd.takeOrdered(10, key = lambda x: x[1][0]/x[1][1])
-    for day in daysOfWeek:
-        print('(' + str(day[0]) + ', ' + str(day[1][0] / day[1][1]) + ')')
-    print('=============================')
-
+AWS_REGION = 'us-east-1'
+DB_TABLE = 't2g3ex2'
+dynamo = dynamodb2.connect_to_region(AWS_REGION)
+out_table = Table(DB_TABLE, connection = dynamo)
 
 def updateFunction(new_values, last_sum):
     new_vals0 = 0.0
@@ -34,15 +34,52 @@ def updateFunction(new_values, last_sum):
 #  flight_date = datetime.date(flight.Year, flight.Month, flight.DayofMonth)
 # AttributeError: 'Ontime' object has no attribute 'Month'
 
+
+######
+###### Mapper and reducer functions for XY flights #######
+######
 def map_flight(flight, is_yz=False):
-    flight_date = datetime.date(flight.FlightDate)
+    flight_date = flight.FlightDate
     y_flight = flight.Dest
     if (is_yz):
         flight_date -= datetime.timedelta(days=2)
         y_flight = flight.Origin
     return ((str(flight_date), y_flight), flight)
 
+def reduce_flight(fl1, fl2):
+    fl1_delay = fl1.DepDelay + fl1.ArrDelay
+    fl2_delay = fl2.DepDelay + fl2.ArrDelay
+    return fl1 if fl1_delay <= fl2_delay else fl2
 
+
+######
+###### Partial results printer #######
+######
+def save_partition(part):
+
+    for record in part:
+        fl_xy = record[1][0]
+        fl_yz = record[1][1]
+        route = fl_xy.Origin + '-' + fl_xy.Dest + '-' + fl_yz.Dest
+        depdate = record[0][0]
+        item_new = Item(out_table, data={
+            "route": route,
+            "depdate": depdate,
+            "flight_xy": fl_xy.UniqueCarrier + str(fl_xy.FlightNum),
+            "flight_yz": fl_yz.UniqueCarrier + str(fl_yz.FlightNum),
+            "total_delay": int(fl_xy.DepDelay + fl_xy.ArrDelay + fl_yz.DepDelay + fl_yz.ArrDelay)
+        })
+
+        # check old item delay
+        try:
+            item_old = out_table.get_item(route=route, depdate = depdate)
+            if (item_old['total_delay'] > item_new['total_delay']):
+                item_new.save(overwrite=True)
+        except:
+            item_new.save(overwrite=True)
+
+
+# ====================================
 conf = SparkConf().setAppName("KafkaStreamProcessor").setMaster("local[*]")
 sc = SparkContext(conf=conf)
 sc.setLogLevel("WARN")
@@ -59,23 +96,30 @@ kafkaStream = KafkaUtils.createDirectStream(ssc,[topic], {
 ontime_data = kafkaStream.map(lambda x: x[1]).map(split).flatMap(parse)
 
 # filter XY candidates
-flights_xy = ontime_data.filter(lambda fl: fl.DepTime < "1200")\
+flights_xy = ontime_data.filter(lambda fl: fl.DepTime < 1200)\
                 .map(map_flight)
-                #.reduceByKey(reduce_flight)
+#                 .reduceByKey(reduce_flight)
 
 # filter YZ candidates
-flights_yz = ontime_data.filter(lambda fl: fl.DepTime > "1200")\
-                .map(lambda fl: map_flight(fl, True))
-                #.reduceByKey(reduce_flight)
+flights_yz = ontime_data.filter(lambda fl: fl.DepTime > 1200)\
+                .map(lambda fl: map_flight(fl, True)).reduceByKey(reduce_flight)
 
 # join both legs
 flights_xyz = flights_xy.join(flights_yz)
 
 
 flights_xyz.foreachRDD(lambda rdd: print_rdd(rdd))
+# flights_xyz.foreachRDD(lambda rdd: rdd.foreachPartition(save_partition))
 
 
 ssc.start()
-time.sleep(600) # Run stream for 10 minutes just in case no detection of producer # ssc. awaitTermination() ssc.stop(stopSparkContext=True,stopGraceFully=True)
 
-# https://github.com/gmcorral/cloud-capstone/blob/master/spark/flight.py
+try:
+    ssc.awaitTermination()
+except:
+    pass
+
+try:
+    time.sleep(10)
+except:
+    pass
