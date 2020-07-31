@@ -2,7 +2,7 @@ import os
 import csv
 import datetime
 from collections import namedtuple
-from StringIO import StringIO
+from io import StringIO
 
 ZOOKEEPER = ['localhost:2181']
 ZKQUORUM = ",".join(ZOOKEEPER) #zkQuorum:  Zookeeper quorum (hostname:port,hostname:port,..)
@@ -10,8 +10,8 @@ ZKQUORUM = ",".join(ZOOKEEPER) #zkQuorum:  Zookeeper quorum (hostname:port,hostn
 LOOKUP_DIR = "~/dev/ccc-capstone/lookup/"
 DATA_DIR = "~/dev/ccc-capstone/filtered_data"
 TEST_DIR = "~/dev/ccc-capstone/test"
-# DATE_FMT = "%Y-%m-%d"
-DATE_FMT = "%m/%d/%Y"
+DATE_FMT = "%Y-%m-%d"
+# DATE_FMT = "%m/%d/%Y"
 TIME_FMT = "%H%M"
 
 
