@@ -16,13 +16,10 @@ TIME_FMT = "%H%M"
 
 
 # Those are my fields
-# fields = ("FlightDate", "AirlineID", "FlightNum", "Origin", "OriginCityName", "OriginStateName", "Dest", "DestCityName",
-#           "DestStateName", "CRSDepTime", "DepDelay", "CRSArrTime", "ArrDelay", "Cancelled", "CancellationCode",
-#           "Diverted", "CRSElapsedTime", "ActualElapsedTime", "AirTime", "Distance")
-
 fields = ("FlightDate", "Origin", "DepTime", "DepDelay", "Dest", "ArrTime", "ArrDelay",
             "DayOfWeek", "AirlineID", "Carrier", "FlightNum", "Year")
 # 1/26/1988,LAS,35,16,ORD,546,20,2,19977,UA,500,1988
+
 # A namedtuple object
 Ontime = namedtuple('Ontime', fields)
 

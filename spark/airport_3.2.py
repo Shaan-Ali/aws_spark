@@ -65,8 +65,8 @@ def save_partition(part):
         item_new = Item(out_table, data={
             "route": route,
             "depdate": depdate,
-            "flight_xy": fl_xy.UniqueCarrier + str(fl_xy.FlightNum),
-            "flight_yz": fl_yz.UniqueCarrier + str(fl_yz.FlightNum),
+            "flight_xy": fl_xy.Carrier + str(fl_xy.FlightNum),
+            "flight_yz": fl_yz.Carrier + str(fl_yz.FlightNum),
             "total_delay": int(fl_xy.DepDelay + fl_xy.ArrDelay + fl_yz.DepDelay + fl_yz.ArrDelay)
         })
 
@@ -108,8 +108,8 @@ flights_yz = ontime_data.filter(lambda fl: fl.DepTime > 1200)\
 flights_xyz = flights_xy.join(flights_yz)
 
 
-flights_xyz.foreachRDD(lambda rdd: print_rdd(rdd))
-# flights_xyz.foreachRDD(lambda rdd: rdd.foreachPartition(save_partition))
+# flights_xyz.foreachRDD(lambda rdd: print_rdd(rdd))
+flights_xyz.foreachRDD(lambda rdd: rdd.foreachPartition(save_partition))
 
 
 ssc.start()
