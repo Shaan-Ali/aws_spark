@@ -12,10 +12,19 @@ from common import *
 
 n_secs = 1
 topic = "order_data"
-conf = SparkConf().setAppName("KafkaStreamProcessor").setMaster("local[*]")
-sc = SparkContext(conf=conf)
+brokerAddresses = "localhost:9092"
+
+# Creating stream.
+# conf = SparkConf().setAppName("KafkaStreamProcessor").setMaster("local[*]")
+# sc = SparkContext(conf=conf)
+spark = SparkSession.builder.appName("PythonHeartbeatStreaming").getOrCreate()
+sc = spark.sparkContext
+# batchTime = 20
+# ssc = StreamingContext(sc, batchTime)
 sc.setLogLevel("WARN")
 ssc = StreamingContext(sc, n_secs)
+kafkaStream = KafkaUtils.createDirectStream(ssc, [topic], {"metadata.broker.list": brokerAddresses})
+
 ssc.checkpoint('~/dev/aws_spark/tmp/g1ex1')
 
 ######
@@ -36,11 +45,13 @@ def updateFunction(new_values, last_sum):
     return sum(new_values) + (last_sum or 0)
 
 
-kafkaStream = KafkaUtils.createDirectStream(ssc,[topic], {
-    'bootstrap.servers':'b-2.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094,b-3.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094,b-1.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094',
-    'group.id':'video-group',
-    'fetch.message.max.bytes':'15728640',
-    'auto.offset.reset':'largest'}) # Group ID is completely arbitrary
+# kafkaStream = KafkaUtils.createDirectStream(ssc,[topic], {
+#     'bootstrap.servers':'b-2.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094,b-3.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094,b-1.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094',
+#     'group.id':'video-group',
+#     'fetch.message.max.bytes':'15728640',
+#     'auto.offset.reset':'largest'}) # Group ID is completely arbitrary
+
+
 
 # Main Code
 ontime_data = kafkaStream.map(lambda x: x[1]).map(split).flatMap(parse)

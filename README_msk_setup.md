@@ -29,9 +29,7 @@ aws kafka get-bootstrap-brokers --region us-east-1 --cluster-arn arn:aws:kafka:u
     --producer.config client.properties --topic order_data
 
 #Main setting:
-./kafka-console-consumer.sh --bootstrap-server 
-b-2.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094,b-3.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094,b-1.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094 
---consumer.config client.properties --topic order_data --from-beginning
+kafka-console-consumer.sh --bootstrap-server b-2.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094,b-3.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094,b-1.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094  --topic order_data --from-beginning
 
 =================
 sg-04b26dcd3337d9765
