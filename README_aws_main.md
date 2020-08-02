@@ -53,13 +53,12 @@ cd ./aws_spark/kafka/
 
 
 #4. New: Start spark job 
+kafka-console-consumer.sh --bootstrap-server b-2.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094,b-3.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094,b-1.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094 --consumer.config /home/hadoop/kafka/bin/client.properties \
+--topic order_data --from-beginning
+
+
 cd ~/aws_spark/spark/
-
 spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0  airport_1.3.py
-
-export KAFKA_HEAP_OPTS="-Xmx250M -Xms250M"
-
---executor-memory 200M
 
 spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0 --master yarn --executor-cores=4 --num-executors 16 --driver-memory=4G --executor-memory=12G 
            airport_1.3.py localhost:2181
@@ -77,5 +76,7 @@ bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 -
 --- /bin/bash ./aws_spark/kafka/push_data_in_topic.sh ./aws_spark/data shaan-VirtualBox:9092 order_data
 -- spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0 --master yarn --executor-cores=4 --num-executors 16 --driver-memory=4G --executor-memory=12G 
            ./aws_spark/spark/spark_streaming_airport.py localhost:2181 AWSKafkaTutorialTopic
+           
+export KAFKA_HEAP_OPTS="-Xmx250M -Xms250M"
 
 
