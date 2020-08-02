@@ -5,6 +5,11 @@ from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
 from common import *
 
+
+# --bootstrap-server
+# b-2.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094,b-3.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094,b-1.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094
+# --consumer.config client.properties --topic order_data --from-beginning
+
 n_secs = 1
 topic = "order_data"
 conf = SparkConf().setAppName("KafkaStreamProcessor").setMaster("local[*]")
@@ -32,7 +37,7 @@ def updateFunction(new_values, last_sum):
 
 
 kafkaStream = KafkaUtils.createDirectStream(ssc,[topic], {
-    'bootstrap.servers':'localhost:9092',
+    'bootstrap.servers':'b-2.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094,b-3.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094,b-1.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094',
     'group.id':'video-group',
     'fetch.message.max.bytes':'15728640',
     'auto.offset.reset':'largest'}) # Group ID is completely arbitrary

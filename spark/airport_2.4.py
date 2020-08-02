@@ -30,7 +30,7 @@ def save_partition(part):
         item = Item(out_table, data={
             "origin": record[0][0],
             "destination": record[0][1],
-            "mean_delay": int(record[1][0] / record[1][1])
+            "average_delay": int(record[1][0] / record[1][1])
         })
         item.save(overwrite=True)
 

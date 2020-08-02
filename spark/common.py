@@ -10,8 +10,8 @@ ZKQUORUM = ",".join(ZOOKEEPER) #zkQuorum:  Zookeeper quorum (hostname:port,hostn
 LOOKUP_DIR = "~/dev/ccc-capstone/lookup/"
 DATA_DIR = "~/dev/ccc-capstone/filtered_data"
 TEST_DIR = "~/dev/ccc-capstone/test"
-# DATE_FMT = "%Y-%m-%d"
-DATE_FMT = "%m/%d/%Y"
+DATE_FMT = "%Y-%m-%d"
+# DATE_FMT = "%m/%d/%Y"
 TIME_FMT = "%H%M"
 
 
@@ -43,18 +43,33 @@ def parse(rows):
 
 def parse_row(row):
     """Parses a row and returns a named tuple"""
+    # row[fields.index("FlightDate")] = datetime.datetime.strptime(row[fields.index("FlightDate")], DATE_FMT).date()
+    # row[fields.index("Origin")] = str(row[fields.index("Origin")])
+    # row[fields.index("DepTime")] = int(row[fields.index("DepTime")])
+    # row[fields.index("DepDelay")] = int(row[fields.index("DepDelay")])
+    # row[fields.index("Dest")] = str(row[fields.index("Dest")])
+    # row[fields.index("ArrTime")] = int(row[fields.index("ArrTime")])
+    # row[fields.index("ArrDelay")] = int(row[fields.index("ArrDelay")])
+    # row[fields.index("DayOfWeek")] = int(row[fields.index("DayOfWeek")])
+    # row[fields.index("AirlineID")] = int(row[fields.index("AirlineID")])
+    # row[fields.index("Carrier")] = str(row[fields.index("Carrier")])
+    # row[fields.index("FlightNum")] = int(row[fields.index("FlightNum")])
+    # row[fields.index("Year")] = int(row[fields.index("Year")])
+
+
     row[fields.index("FlightDate")] = datetime.datetime.strptime(row[fields.index("FlightDate")], DATE_FMT).date()
     row[fields.index("Origin")] = str(row[fields.index("Origin")])
-    row[fields.index("DepTime")] = int(row[fields.index("DepTime")])
-    row[fields.index("DepDelay")] = int(row[fields.index("DepDelay")])
+    print(row[fields.index("DepTime")])
+    row[fields.index("DepTime")] = float(row[fields.index("DepTime")])
+    row[fields.index("DepDelay")] = float(row[fields.index("DepDelay")])
     row[fields.index("Dest")] = str(row[fields.index("Dest")])
-    row[fields.index("ArrTime")] = int(row[fields.index("ArrTime")])
-    row[fields.index("ArrDelay")] = int(row[fields.index("ArrDelay")])
-    row[fields.index("DayOfWeek")] = int(row[fields.index("DayOfWeek")])
-    row[fields.index("AirlineID")] = int(row[fields.index("AirlineID")])
+    row[fields.index("ArrTime")] = float(row[fields.index("ArrTime")])
+    row[fields.index("ArrDelay")] = float(row[fields.index("ArrDelay")])
+    row[fields.index("DayOfWeek")] = float(row[fields.index("DayOfWeek")])
+    row[fields.index("AirlineID")] = float(row[fields.index("AirlineID")])
     row[fields.index("Carrier")] = str(row[fields.index("Carrier")])
-    row[fields.index("FlightNum")] = int(row[fields.index("FlightNum")])
-    row[fields.index("Year")] = int(row[fields.index("Year")])
+    row[fields.index("FlightNum")] = float(row[fields.index("FlightNum")])
+    row[fields.index("Year")] = float(row[fields.index("Year")])
 
 #     # cicle amoung scheduled times
 #     for index in ["DepTime", "ArrTime"]:
