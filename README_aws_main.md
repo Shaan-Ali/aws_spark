@@ -57,6 +57,12 @@ cd ~/aws_spark/spark/
 
 spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0  airport_1.3.py
 
+export KAFKA_HEAP_OPTS="-Xmx250M -Xms250M"
+
+--executor-memory 200M
+
+spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0 --master yarn --executor-cores=4 --num-executors 16 --driver-memory=4G --executor-memory=12G 
+           airport_1.3.py localhost:2181
 #=================================================
 # others: for help:
 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test
