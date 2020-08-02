@@ -5,6 +5,7 @@ sudo yum install java-1.8.0
 wget https://archive.apache.org/dist/kafka/2.2.1/kafka_2.12-2.2.1.tgz
 tar -xzf kafka_2.12-2.2.1.tgz
 mv kafka_2.12-2.2.1 kafka
+rm kafka_2.12-2.2.1.tgz
 cd kafka
 
 ================================================
