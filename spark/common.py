@@ -59,7 +59,6 @@ def parse_row(row):
 
     row[fields.index("FlightDate")] = datetime.datetime.strptime(row[fields.index("FlightDate")], DATE_FMT).date()
     row[fields.index("Origin")] = str(row[fields.index("Origin")])
-    print(row[fields.index("DepTime")])
     row[fields.index("DepTime")] = float(row[fields.index("DepTime")])
     row[fields.index("DepDelay")] = float(row[fields.index("DepDelay")])
     row[fields.index("Dest")] = str(row[fields.index("Dest")])

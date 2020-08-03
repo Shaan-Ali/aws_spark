@@ -17,7 +17,7 @@ sc.setLogLevel("WARN")
 ssc = StreamingContext(sc, n_secs)
 
 ssc.checkpoint('~/dev/aws_spark/tmp/g2ex4')
-AWS_REGION = 'us-east-1'
+AWS_REGION = 'us-east-2'
 DB_TABLE = 't2g2ex4'
 dynamo = dynamodb2.connect_to_region(AWS_REGION)
 out_table = Table(DB_TABLE, connection = dynamo)

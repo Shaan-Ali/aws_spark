@@ -12,7 +12,7 @@ from boto.dynamodb2.items import Item
 n_secs = 1
 topic = "order_data"
 
-AWS_REGION = 'us-east-1'
+AWS_REGION = 'us-east-2'
 DB_TABLE = 't2g3ex2'
 dynamo = dynamodb2.connect_to_region(AWS_REGION)
 out_table = Table(DB_TABLE, connection = dynamo)
@@ -66,8 +66,9 @@ def save_partition(part):
             "route": route,
             "depdate": depdate,
             "flight_xy": fl_xy.Carrier + str(fl_xy.FlightNum),
+            "xy_delay": int(fl_xy.DepDelay + fl_xy.ArrDelay),
             "flight_yz": fl_yz.Carrier + str(fl_yz.FlightNum),
-            "total_delay": int(fl_xy.DepDelay + fl_xy.ArrDelay + fl_yz.DepDelay + fl_yz.ArrDelay)
+            "yz_delay": int(fl_yz.DepDelay + fl_yz.ArrDelay)
         })
 
         # check old item delay
