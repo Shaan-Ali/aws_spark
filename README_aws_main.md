@@ -50,6 +50,9 @@ cd ./aws_spark/kafka/
 /bin/bash ./push_data_in_topic.sh ../data/ ip-172-31-57-79:9092 order_data
 
 /bin/bash ./push_data_in_topic.sh ../data/     b-2.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094,b-3.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094,b-1.awskafkatutorialcluste.ea4k5h.c1.kafka.us-east-1.amazonaws.com:9094   order_data
+---
+kafka-topics.sh --delete --topic order_date --zookeeper master:2181
+kafka-topics.sh --list --zookeeper master:2181
 
 
 #4. New: Start spark job 
